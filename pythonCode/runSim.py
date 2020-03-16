@@ -9,7 +9,7 @@ def main():
     env = gym.make("gym_utaTransit:utaTransit-v0")
     #if you want to run without the visualization, comment out the next three lines and line 22
     renderer = envRender(550, 400) #pass box size
-    renderer.setupView("C:\\Work\\IntermodalHub\\Simulation\\pythonCode\\render\\assets\\drawing.gif")
+    renderer.setupView("./render/assets/drawing.gif")
     renderer.setupState()
 
     #observation = env.reset()

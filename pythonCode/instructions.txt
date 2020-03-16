@@ -6,4 +6,8 @@ To Run:
     pip install gym
 
 -Install the custom gym environment:
-    pip install gym-utaTransit
+    pip install -e gym-utaTransit
+
+-Run:
+    in pythonCode folder run:
+        python runSim.py
