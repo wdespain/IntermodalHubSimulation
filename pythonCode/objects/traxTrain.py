@@ -17,7 +17,7 @@ class TraxTrain(Vehicle):
 
         #This that the larger program may signal to change
 
-    #Implementing EnvAgent functions---------------------
+    #Implementing EnvConsumer functions---------------------
     def step(self):
         super().step()
 

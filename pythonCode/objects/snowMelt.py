@@ -2,9 +2,9 @@
 import random
 
 #internal classes
-from .envAgent import EnvAgent
+from .envConsumer import EnvConsumer
 
-class SnowMelt(EnvAgent):
+class SnowMelt(EnvConsumer):
 
     def __init__(self, i):
         #Things that will not change once set
@@ -19,10 +19,11 @@ class SnowMelt(EnvAgent):
         #This that the larger program may signal to change
         self.running = False
 
-    #Implementing EnvAgent functions---------------------
+    #Implementing EnvConsumer functions---------------------
 
     #This doesn't move so nothing needs to happen in step right now
     #but this needs to be implemented so nothing gets messed up
+    #in the future checking for time of day/year may need to happen
     def step(self): 
         if(self.running == False): #all this stuff is only for demo, take out!
             chance = random.randrange(1, 8)
@@ -45,3 +46,7 @@ class SnowMelt(EnvAgent):
         return "Snow Melt " + str(self.ID) + " On? " + str(self.running)
 
     #-------------------------------------------------------
+
+    def changePowerFlow(self, e):
+        self.energyUsePerSec = e
+        

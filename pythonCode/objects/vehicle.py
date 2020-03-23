@@ -5,9 +5,9 @@ import random
 import numpy as np
 
 #internal classes
-from .envAgent import EnvAgent
+from .envConsumer import EnvConsumer
 
-class Vehicle(EnvAgent):
+class Vehicle(EnvConsumer):
 
     def __init__(self, i, e, s, m):
         #Things that will not change once set
@@ -29,7 +29,7 @@ class Vehicle(EnvAgent):
         #This that the larger program may signal to change
         self.movementPerSec = 0 #mph, but may be pos/neg to denote direction
 
-    #Implementing EnvAgent functions------------------------
+    #Implementing EnvConsumer functions------------------------
     #This holds the most basic functionality of a vehicle,
     # child classes should extend this, not just overide
     def step(self):

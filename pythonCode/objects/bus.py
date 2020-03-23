@@ -8,7 +8,7 @@ from .vehicle import Vehicle
 class Bus(Vehicle):
 
     def __init__(self, i, s):
-        #Things that will not change once set\
+        #Things that will not change once set
         super().__init__(
             i, #ID
             .4, #energyUsePerSecond
@@ -22,9 +22,9 @@ class Bus(Vehicle):
 
         #This that the larger program may signal to change
         self.charging = False
-        self.chargingRate = .4
+        self.chargingRate = 0
 
-    #Implementing EnvAgent functions---------------------
+    #Implementing EnvConsumer functions---------------------
 
     def step(self):
         if(self.charging == True):
@@ -39,10 +39,8 @@ class Bus(Vehicle):
         super().step()
 
     def energyUseForStep(self):
-        if self.charging == True:
-            return self.chargingRate
-        else:
-            return 0
+        return 0 #This returns 0 because a bus itself never actually takes energy from the hub, 
+        #it only ever gets power from a busCharger, so if a bus is charging the busCharger object will reflect that energy usage
 
     def textOutput(self):
         output = "Bus " + super().textOutput()
@@ -56,3 +54,7 @@ class Bus(Vehicle):
         if self.currCharge > self.maxCharge:
             self.currCharge = self.maxCharge
             self.charging = False
+
+    def setChargingRate(self, c):
+        self.chargingRate = c
+        
