@@ -3,11 +3,11 @@ To Run:
 -Have Python 3.x installed 
 
 -Install Open AI Gym:
-    pip install gym
+    pip install gym (run this command in a terminal)
 
 -Install the custom gym environment:
-    pip install -e gym-utaTransit
+    pip install -e gym-utaTransit (run this command in a terminal)
 
 -Run:
-    in pythonCode folder run:
+    In a terminal, navigate to the pythonCode folder and run:
         python runSim.py

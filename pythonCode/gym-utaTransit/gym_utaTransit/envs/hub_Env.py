@@ -43,7 +43,6 @@ class HubEnv(gym.Env):
 
   def render(self, mode='human', close=False):
     self.consolePrintState()
-    input("")
 
   def calculateReward(self): #need to implement
     return 1

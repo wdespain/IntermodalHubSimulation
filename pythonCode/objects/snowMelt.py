@@ -37,7 +37,6 @@ class SnowMelt(EnvAgent):
 
     def energyUseForStep(self):
         if self.running == True:
-            print("sm returning energy: "+str(self.energyUsePerSec))
             return self.energyUsePerSec
         else:
             return 0

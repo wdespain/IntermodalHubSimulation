@@ -14,6 +14,8 @@ def main():
 
     #observation = env.reset()
     while True:
+      input("Press any button to go to next step.")
+      
       env.render()
       
       action = env.action_space.sample() # your agent here (this takes random actions)
