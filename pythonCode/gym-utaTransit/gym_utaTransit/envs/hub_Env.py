@@ -1,3 +1,7 @@
+#python libraries
+import datetime
+import math
+
 #other libraries
 import gym
 from gym import error, spaces, utils
@@ -13,6 +17,8 @@ class HubEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
   def __init__(self):
+    self.simulationTimeInSeconds = math.trunc(datetime.datetime(2000, 1, 1).timestamp())
+
     self.consumers = []
 
     #make consumers
@@ -32,6 +38,8 @@ class HubEnv(gym.Env):
   #needed for gym Env---
 
   def step(self, action):
+    self.simulationTimeInSeconds += 1
+
     self.currEnergyUse = 0
 
     for p in self.consumers:
@@ -46,6 +54,7 @@ class HubEnv(gym.Env):
     self.consumers = []
 
   def render(self, mode='human', close=False):
+    print("timestamp: "+datetime.datetime.utcfromtimestamp(self.simulationTimeInSeconds).strftime("%d/%m/%Y, %H:%M:%S"))
     self.consolePrintState()
 
   def calculateReward(self): #need to implement
