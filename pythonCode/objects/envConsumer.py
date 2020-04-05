@@ -8,7 +8,7 @@ class EnvConsumer:
         #This that the larger program may signal to change
         self.energyUsePerSec = .4 #in kWh
 
-    def step(self):
+    def step(self, time):
         raise NotImplementedError
 
     def energyUseForStep(self):

@@ -17,15 +17,20 @@ class HubEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
   def __init__(self):
-    self.simulationTimeInSeconds = math.trunc(datetime.datetime(2000, 1, 1).timestamp())
-
+    self.simulationDateTime = datetime.datetime(2000, 1, 1, 5, 42)
+    
     self.consumers = []
 
     #make consumers
     self.consumers.append(BusCharger(1)) #Note: Bus Charger Should be added to the list before buses for later logic reasons
-    self.consumers.append(Bus(2, [[5,5], [4,4], [3,3], [2,2], [1,1], [0, 0]])) #[5, 5 is hub]
-    self.consumers.append(TraxTrain(3, [[5,5], [4,4], [3,3], [2,2], [1,1], [0, 0]]))
-    self.consumers.append(SnowMelt(4))
+    #self.consumers.append(Bus(2, stopList = [[5,5], [4,4], [3,3], [2,2], [1,1], [0, 0]])) #[5, 5 is hub]
+    #routeTime is in seconds
+    self.consumers.append(Bus(2, "6:15", "20:15", routeTime = 5400)) #length of one hour and a half
+    self.consumers.append(Bus(3, "5:45", "22:30", routeTime = 1800)) #length of a half hour
+    self.consumers.append(Bus(4, "6:00", "23:30", routeTime = 3600)) #length of one hour 
+    self.consumers.append(TraxTrain(5, "5:43", "23:28", routeTime = 6240)) #represents one train of Blue Line (701)
+    self.consumers.append(TraxTrain(7, "5:58", "23:28", routeTime = 6240)) #represents one train of Blue Line (701)
+    self.consumers.append(SnowMelt(8))
 
     self.currEnergyUse = 0
 
@@ -38,12 +43,12 @@ class HubEnv(gym.Env):
   #needed for gym Env---
 
   def step(self, action):
-    self.simulationTimeInSeconds += 1
+    self.simulationDateTime += datetime.timedelta(seconds=1)
 
     self.currEnergyUse = 0
 
     for p in self.consumers:
-      p.step()
+      p.step(self.simulationDateTime)
       self.currEnergyUse += p.energyUseForStep()
 
     reward = self.calculateReward()
@@ -54,7 +59,8 @@ class HubEnv(gym.Env):
     self.consumers = []
 
   def render(self, mode='human', close=False):
-    print("timestamp: "+datetime.datetime.utcfromtimestamp(self.simulationTimeInSeconds).strftime("%d/%m/%Y, %H:%M:%S"))
+    #print("timestamp: " + datetime.utcfromtimestamp(self.simulationTimeInSeconds).strftime("%d/%m/%Y, %H:%M:%S"))
+    print("timestamp: " + self.simulationDateTime.strftime("%d/%m/%Y, %H:%M:%S"))
     self.consolePrintState()
 
   def calculateReward(self): #need to implement
@@ -69,9 +75,14 @@ class HubEnv(gym.Env):
 
   def packageInfoForRenderer(self):
     info = {}
-    info["traxNearHub"] = self.consumers[2].nearHub()
-    info["currEnergyUse"] = self.currEnergyUse
-    info["busNearHub"] = self.consumers[1].nearHub()
-    info["snowMeltRunning"] = self.consumers[3].running
     info["busChargerOccupied"] = self.consumers[0].occupied
+    info["busInfo"] = []
+    info["busInfo"].append({ "busNearHub" : self.consumers[1].nearHub() })
+    info["busInfo"].append({ "busNearHub" : self.consumers[2].nearHub() })
+    info["busInfo"].append({ "busNearHub" : self.consumers[3].nearHub() })
+    info["traxInfo"] = []
+    info["traxInfo"].append({ "traxNearHub" : self.consumers[4].nearHub() })
+    info["traxInfo"].append({ "traxNearHub" : self.consumers[5].nearHub() })
+    info["snowMeltRunning"] = self.consumers[6].running
+    info["currEnergyUse"] = self.currEnergyUse
     return info

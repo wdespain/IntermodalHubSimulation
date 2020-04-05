@@ -3,13 +3,16 @@ from .vehicle import Vehicle
 
 class TraxTrain(Vehicle):
 
-    def __init__(self, i, s):
+    def __init__(self, i, st, et, stopList = None, routeTime = -1):
         #Things that will not change once set
         super().__init__(
             i, #ID
             0, #energyUsePerSecond
-            s, #stops
-            .5 #maxSpeed
+            stopList, #stops
+            .5, #maxSpeed
+            routeTime,
+            st, #startTime
+            et #endTime
         )
         self.energyProfile = {}
 
@@ -18,8 +21,8 @@ class TraxTrain(Vehicle):
         #This that the larger program may signal to change
 
     #Implementing EnvConsumer functions---------------------
-    def step(self):
-        super().step()
+    def step(self, time):
+        super().step(time)
 
     def energyUseForStep(self):
         if self.nearHub() == True:

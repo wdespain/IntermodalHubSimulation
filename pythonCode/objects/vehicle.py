@@ -1,5 +1,6 @@
 #python libraries
 import random
+from datetime import datetime
 
 #other libraries
 import numpy as np
@@ -8,8 +9,8 @@ import numpy as np
 from .envConsumer import EnvConsumer
 
 class Vehicle(EnvConsumer):
-
-    def __init__(self, i, e, s, m):
+    #There are two ways to control routing, a stops list or time for a route to take
+    def __init__(self, i, e, s, m, rt, st, et):
         #Things that will not change once set
         super().__init__(
             i, #ID
@@ -17,7 +18,14 @@ class Vehicle(EnvConsumer):
         )
         self.stops = s
         self.maxSpeed = m
+        self.routeTime = rt
+        self.startTimeHour = int(st.split(":")[0])
+        self.startTimeMinute = int(st.split(":")[1])
+        self.endTimeHour = int(et.split(":")[0])
+        self.endTimeMinute = int(et.split(":")[1])
+        self.routeRunning = False
 
+        #start of items needed for stop list control
         #Things that will change, but only by internal processes
         self.location = [5, 5] #x, y
         self.stopCountdown = 0 #this will tell how long the vehicle should be stopped at a stop
@@ -28,11 +36,58 @@ class Vehicle(EnvConsumer):
 
         #This that the larger program may signal to change
         self.movementPerSec = 0 #mph, but may be pos/neg to denote direction
+        #end of items needed for stop list control
+
+        #start of items needed for route time control
+        #Things that will change, but only by internal processes
+        self.timeToHub = self.routeTime
+
+        #end of items needed for route time control
 
     #Implementing EnvConsumer functions------------------------
     #This holds the most basic functionality of a vehicle,
     # child classes should extend this, not just overide
-    def step(self):
+    def step(self, time):
+        if self.routeRunning == False:
+            if self.checkForStartTime(time) == True:
+                self.routeRunning = True
+        else:
+            if self.checkForEndTime(time) == True:
+                self.routeRunning = False
+            else:
+                if self.stops != None:
+                    self.stopsRoutingStep()
+                else:
+                    self.routeTimeStep()
+                    
+
+    #outputs basic information for vehicle
+    #  child clases should extend, not overide
+    def textOutput(self):
+        output = str(self.ID)
+        output +=  " Route Running? " + str(self.routeRunning)
+        if self.stops != None:
+            output += " Location: " + str(self.location)
+            output += " Curr Speed/Sec: " + str(self.movementPerSec*np.sign(self.movementDirection))
+            output += " Going? "
+            if self.stopped == True:
+                output +=  "Stopped (" + str(self.stopCountdown) + ")"
+            if self.speedUp == True:
+                output += " Accelerating "
+            if self.slowDown == True:
+                output += " Decelerating "
+        else:
+            output += " Time to Hub: " + str(self.timeToHub)
+        return output
+
+    #-------------------------------------------------------
+
+    def routeTimeStep(self):
+        self.timeToHub -= 1
+        if self.timeToHub <= 0:
+            self.timeToHub = self.routeTime
+
+    def stopsRoutingStep(self):
         self.stopCountdown -= 1
         if(self.stopped == True and self.stopCountdown <= 0 ):
             self.stopped = False
@@ -42,23 +97,6 @@ class Vehicle(EnvConsumer):
             self.updateSpeed()
             self.updateLocation()
             self.checkForUpcomingStop()
-
-    #outputs basic information for vehicle
-    #  child clases should extend, not overide
-    def textOutput(self):
-        output = str(self.ID)
-        output += " Location: " + str(self.location)
-        output += " Curr Speed/Sec: " + str(self.movementPerSec*np.sign(self.movementDirection))
-        output += " Going? "
-        if self.stopped == True:
-            output +=  "Stopped (" + str(self.stopCountdown) + ")"
-        if self.speedUp == True:
-            output += " Accelerating "
-        if self.slowDown == True:
-            output += " Decelerating "
-        return output
-
-    #-------------------------------------------------------
 
     #updates speed based on speeding up or slowing down
     #note : since movementPerSec may be negative, the speed change needs to take into account the pos/neg of movementPerSec
@@ -120,7 +158,28 @@ class Vehicle(EnvConsumer):
 
     #assumption: hub is stop[0]
     def nearHub(self):
-        if self.checkIfLocationInRange(self.stops[0], .5, .5, .5, .5):
+        if self.routeRunning == True:
+            if self.stops != None and self.checkIfLocationInRange(self.stops[0], .5, .5, .5, .5):
+                return True
+            elif self.routeTime != -1 and (self.timeToHub <= 5 or self.timeToHub >= (self.routeTime - 5)):
+                return True
+            else:
+                return False
+
+    def checkForStartTime(self, time):
+        #parseTime = datetime.utcfromtimestamp(time)
+        if (time.hour > self.startTimeHour):
+            return True
+        elif (time.hour == self.startTimeHour) and (time.minute >= self.startTimeMinute):
+            return True
+        else:
+            return False
+
+    def checkForEndTime(self, time):
+        #parseTime = datetime.utcfromtimestamp(time)
+        if (time.hour > self.endTimeHour):
+            return True
+        elif (time.hour == self.endTimeHour) and (time.minute >= self.endTimeMinute):
             return True
         else:
             return False

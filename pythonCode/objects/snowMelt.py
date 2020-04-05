@@ -24,7 +24,7 @@ class SnowMelt(EnvConsumer):
     #This doesn't move so nothing needs to happen in step right now
     #but this needs to be implemented so nothing gets messed up
     #in the future checking for time of day/year may need to happen
-    def step(self): 
+    def step(self, time): 
         if(self.running == False): #all this stuff is only for demo, take out!
             chance = random.randrange(1, 8)
             if chance == 3:

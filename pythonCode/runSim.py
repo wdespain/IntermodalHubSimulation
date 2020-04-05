@@ -7,10 +7,10 @@ from render.renderer import envRender
 
 def main():
     env = gym.make("gym_utaTransit:utaTransit-v0")
-    #if you want to run without the visualization, comment out the next three lines and line 22
+    #if you want to run without the visualization, comment out the next three lines and line 24
     renderer = envRender(550, 400) #pass box size
     renderer.setupView("./render/assets/drawing.gif")
-    renderer.setupState()
+    renderer.setupState(env.packageInfoForRenderer())
 
     #observation = env.reset()
     while True:

@@ -1,6 +1,6 @@
 To Run:
 
--Have Python 3.x installed 
+-Have Python 3.x installed
 
 -Install Open AI Gym:
     pip install gym (run this command in a terminal)

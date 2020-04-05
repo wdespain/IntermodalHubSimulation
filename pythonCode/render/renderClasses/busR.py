@@ -12,20 +12,25 @@ class BusR():
         self.busWidth = 40
         self.busLength = 75
 
-        self.busPos = [[140, 0], [180, 0], [180, 75], [140, 75]]
+        self.busPos = [[140, 0], [180, 0], [180, -75], [140, -75]]
+
+        self.rendering = False
 
     def setCanvasObject(self, co):
         self.canvasObject = co
 
     def updateState(self):
-        self.busOn += 1
-        if self.busOn >= len(self.busSteps):
-            return "delete"
-        else:
-            self.curPos[0] += self.busSteps[self.busOn][0]
-            self.curPos[1] += self.busSteps[self.busOn][1]
-            self.calculateBusPoints()
-            return self.busSteps[self.busOn]
+        if self.rendering == True:
+            self.busOn += 1
+            if self.busOn >= len(self.busSteps):
+                self.rendering = False
+                self.busOn = -1
+                return "done"
+            else:
+                self.curPos[0] += self.busSteps[self.busOn][0]
+                self.curPos[1] += self.busSteps[self.busOn][1]
+                self.calculateBusPoints()
+                return self.busSteps[self.busOn]
 
     def calculateBusPoints(self):
         self.busPos[0][0] = self.curPos[0]

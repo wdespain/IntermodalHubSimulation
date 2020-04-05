@@ -19,7 +19,7 @@ class BusCharger(EnvConsumer):
     #Implementing EnvConsumer functions---------------------
 
     #This doesn't move so nothing needs to happen in step right now
-    def step(self): 
+    def step(self, time): 
         self.occupied = self.occupied #this needs to be here because this func needs to be implemented so nothing gets messed up
 
     def energyUseForStep(self):

@@ -7,13 +7,16 @@ from .vehicle import Vehicle
 
 class Bus(Vehicle):
 
-    def __init__(self, i, s):
+    def __init__(self, i, st, et, stopList = None, routeTime = -1):
         #Things that will not change once set
         super().__init__(
             i, #ID
             .4, #energyUsePerSecond
-            s, #stops
-            .3 #maxSpeed
+            stopList, #stops
+            .3, #maxSpeed
+            routeTime,
+            st, #startTime
+            et #endTime
         )
         self.maxCharge = 700
         
@@ -26,17 +29,12 @@ class Bus(Vehicle):
 
     #Implementing EnvConsumer functions---------------------
 
-    def step(self):
+    def step(self, time):
         if(self.charging == True):
-            #since stopped will be changed by the base class, we check here to see if the base function has told the bus to go
-            # if so, we obviously need to stop charging
-            if(self.stopped == False):
-                self.charging = False
-            else:
-                self.charge()
-        if(self.stopped == False):
+            self.charge()
+        else:
             self.currCharge -= self.energyUsePerSec
-        super().step()
+        super().step(time)
 
     def energyUseForStep(self):
         return 0 #This returns 0 because a bus itself never actually takes energy from the hub, 
@@ -57,4 +55,10 @@ class Bus(Vehicle):
 
     def setChargingRate(self, c):
         self.chargingRate = c
+
+    def signalToCharge(self):
+        self.charging = True
+
+    def signalToStopCharging(self):
+        self.charging = False
         
