@@ -11,7 +11,7 @@ class Bus(Vehicle):
         #Things that will not change once set
         super().__init__(
             i, #ID
-            .4, #energyUsePerSecond
+            .04, #energyUsePerSecond
             stopList, #stops
             .3, #maxSpeed
             routeTime,
