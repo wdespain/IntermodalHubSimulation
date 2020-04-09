@@ -7,7 +7,7 @@ class TraxTrain(Vehicle):
         #Things that will not change once set
         super().__init__(
             i, #ID
-            0, #energyUsePerSecond
+            0, #energyUsePerSec
             stopList, #stops
             .5, #maxSpeed
             routeTime,
@@ -34,5 +34,8 @@ class TraxTrain(Vehicle):
     def textOutput(self):
         output = "Trax " + super().textOutput()
         return output
+
+    def changePowerFlow(self, e):
+        raise Error("You Cannot Change Power Flow to the Trax! The Trax is Unchanging and Uncaring.")
 
     #-------------------------------------------------------

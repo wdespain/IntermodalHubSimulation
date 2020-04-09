@@ -19,7 +19,7 @@ class HubEnv(gym.Env):
 
   def __init__(self):
     #start time
-    self.simulationDateTime = datetime.datetime(2000, 1, 31, 22, 42) #Year, month, day, hour, min
+    self.simulationDateTime = datetime.datetime(2000, 1, 1, 5, 30) #Year, month, day, hour, min
     
     #make consumers
     self.consumers = []
@@ -46,20 +46,29 @@ class HubEnv(gym.Env):
     self.observation_space = self.createObservationSpace()
 
     self.action_space = spaces.Tuple((
-      spaces.Discrete(1),
-      spaces.Discrete(1)
+      spaces.Tuple((
+        spaces.Discrete(1),
+        spaces.Discrete(40),
+      )),
+      spaces.Tuple((
+        spaces.Discrete(1),
+        spaces.Discrete(40)
+      ))
     ))
 
   #needed for gym Env---
 
   def step(self, action):
+    self.currEnergyUse = 0
+
+    self.implementAction(action)
+
+    #update time
     oldMonth = self.simulationDateTime.month
     self.simulationDateTime += datetime.timedelta(seconds=1)
     if(self.simulationDateTime.month > oldMonth): #reset month counters
       self.energyUseForMonth = 0
       self.chargeForMonth = self.pricingSchema.baseCharge
-
-    self.currEnergyUse = 0
 
     #get energy for step
     for p in self.consumers:
@@ -87,13 +96,11 @@ class HubEnv(gym.Env):
   #------------------------
 
   def createObservationSpace(self):
-    test = int(self.consumers[0].energyUseForStep()*10)
-    print(test)
     return spaces.Tuple((
       spaces.Tuple(( #All Bus Chargers
         spaces.Tuple(( #Specific Bus Charger Tuple
           spaces.Discrete(self.consumers[0].occupied if 1 else 0), #Occupied - a Bool, just 1 or 0
-          spaces.Discrete(test)
+          spaces.Discrete(int(self.consumers[0].energyUseForStep()*10))
         ))
       )),
       spaces.Tuple(( #All Buses
@@ -134,6 +141,50 @@ class HubEnv(gym.Env):
       spaces.Discrete(self.pricingSchema.peakEnergyThreashold), # peak power
       spaces.Discrete(int(self.energyUseForMonth * 100)) #power usage for the month
     ))
+
+  def implementAction(self, action):
+    print("--TEST ACTION--")
+    print(action)
+    #First - bool. Tell incoming bus to charge, or if a bus is charging tell it to leave
+    if action[0][0] == 1:
+      if self.consumers[0].occupied == True:
+        self.busLeaveCharging()
+      else:
+        self.busToCharging()
+    #Second - int kWh * 100. Change power going to bus charger
+    self.consumers[0].changePowerFlow(action[0][1]/100) 
+    #Third - bool. Turn snowmelt on or off
+    if action[1][1] == 1:
+      self.consumers[6].switchRunning()
+      print("snowmelt switch")
+    #Fourth - int. kWh * 100. Charge power going to snowmelt
+    self.consumers[6].changePowerFlow(action[1][1]/100)
+
+  def busToCharging(self):
+    if self.consumers[1].nearHub() == True:
+      print("Bus "+str(self.consumers[1].ID) +" to charge")
+      self.consumers[1].signalToCharge()
+      self.consumers[0].occupy(self.consumers[1].ID)
+    elif self.consumers[2].nearHub() == True:
+      print("Bus "+str(self.consumers[1].ID) +" to charge")
+      self.consumers[2].signalToCharge()
+      self.consumers[0].occupy(self.consumers[2].ID)
+    elif self.consumers[3].nearHub() == True:
+      print("Bus "+str(self.consumers[1].ID) +" to charge")
+      self.consumers[3].signalToCharge()
+      self.consumers[0].occupy(self.consumers[3].ID)
+
+  def busLeaveCharging(self):
+    busID = self.consumers[0].busChargingID
+    print("Bus "+str(busID)+" leaving charging")
+    self.consumers[0].deoccupy()
+    c = self.getBusWithID(busID)
+    c.signalToStopCharging()
+
+  def getBusWithID(self, busID):
+    for c in self.consumers:
+      if c.ID == busID:
+        return c
 
   def consolePrintState(self):
     print("timestamp: " + self.simulationDateTime.strftime("%d/%m/%Y, %H:%M:%S"))

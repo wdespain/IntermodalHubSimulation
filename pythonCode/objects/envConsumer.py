@@ -16,3 +16,6 @@ class EnvConsumer:
 
     def textOutput(self):
         raise NotImplementedError
+
+    def changePowerFlow(self, e):
+        self.energyUsePerSec = e

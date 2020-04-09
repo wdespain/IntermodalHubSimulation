@@ -14,7 +14,7 @@ class Vehicle(EnvConsumer):
         #Things that will not change once set
         super().__init__(
             i, #ID
-            e #energyUsePerSecond
+            e #energyUsePerSec
         )
         self.stops = s
         self.maxSpeed = m

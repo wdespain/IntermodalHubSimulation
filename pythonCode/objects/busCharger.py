@@ -7,7 +7,7 @@ class BusCharger(EnvConsumer):
         #Things that will not change once set
         super().__init__(
             i, #ID
-            .4 #energyUsePerSecond
+            .4 #energyUsePerSec
         )
 
         #Things that will change, but only by internal processes
@@ -29,7 +29,10 @@ class BusCharger(EnvConsumer):
             return 0
 
     def textOutput(self):
-        return "Bus Charger " + str(self.ID) + " Occupied? " + str(self.occupied)
+        returnString = "Bus Charger " + str(self.ID) + "Potential Energy: " + str(self.energyUsePerSec) + " Occupied? " + str(self.occupied)
+        if self.occupied:
+            returnString += " Bus: "+str(self.busChargingID)
+        return returnString
 
     #-------------------------------------------------------
 
@@ -40,6 +43,3 @@ class BusCharger(EnvConsumer):
     def deoccupy(self):
         self.occupied = False
         self.busChargingID = None
-
-    def changePowerFlow(self, e):
-        self.energyUsePerSec = e

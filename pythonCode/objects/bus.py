@@ -11,7 +11,7 @@ class Bus(Vehicle):
         #Things that will not change once set
         super().__init__(
             i, #ID
-            .04, #energyUsePerSecond
+            .04, #energyUsePerSec
             stopList, #stops
             .3, #maxSpeed
             routeTime,
@@ -35,7 +35,7 @@ class Bus(Vehicle):
             self.charge()
         else:
             self.currCharge -= self.energyUsePerSec
-        super().step(time)
+            super().step(time)
 
     def energyUseForStep(self):
         return 0 #This returns 0 because a bus itself never actually takes energy from the hub, 
