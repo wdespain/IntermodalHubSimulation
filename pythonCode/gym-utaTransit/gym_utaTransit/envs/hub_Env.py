@@ -46,13 +46,17 @@ class HubEnv(gym.Env):
     self.observation_space = self.createObservationSpace()
 
     self.action_space = spaces.Tuple((
-      spaces.Tuple((
-        spaces.Discrete(1),
-        spaces.Discrete(40),
+      spaces.Tuple(( #Bus Chargers
+        spaces.Tuple(( #Bus charger 1
+          spaces.Discrete(1), #telling to start/stop charging
+          spaces.Discrete(40) #telling what power level to give to bus charger
+        ))
       )),
-      spaces.Tuple((
-        spaces.Discrete(1),
-        spaces.Discrete(40)
+      spaces.Tuple(( #snow melts
+        spaces.Tuple(( #snow melt 1
+          spaces.Discrete(1), #telling to turn on/off
+          spaces.Discrete(40) #telling what power level to give to the snow melt
+        ))
       ))
     ))
 
@@ -100,51 +104,49 @@ class HubEnv(gym.Env):
       spaces.Tuple(( #All Bus Chargers
         spaces.Tuple(( #Specific Bus Charger Tuple
           spaces.Discrete(self.consumers[0].occupied if 1 else 0), #Occupied - a Bool, just 1 or 0
-          spaces.Discrete(int(self.consumers[0].energyUseForStep()*10))
+          spaces.Discrete(int(self.consumers[0].energyUseForStep()*100)) #kWh * 100, to be an int
         ))
       )),
       spaces.Tuple(( #All Buses
         spaces.Tuple(( #Bus 1
-          spaces.Discrete(int(self.consumers[1].currCharge/self.consumers[1].maxCharge)), #bus charge
-          spaces.Discrete(self.consumers[1].minChargeForRoute), # min charge needed for route
-          spaces.Discrete(self.consumers[1].timeToHub)
+          spaces.Discrete(int((self.consumers[1].currCharge/self.consumers[1].maxCharge)*100)), #bus charge as a percent
+          spaces.Discrete(int(self.consumers[1].minChargeForRoute*100)), # min charge needed for route, kWh * 100, to be an int
+          spaces.Discrete(self.consumers[1].timeToHub) #when it will next be at the hub in seconds
         )),
         spaces.Tuple(( #Bus 2
           spaces.Discrete(int(self.consumers[2].currCharge/self.consumers[1].maxCharge)), #bus charge
-          spaces.Discrete(self.consumers[2].minChargeForRoute), # min charge needed for route
-          spaces.Discrete(self.consumers[2].timeToHub)
+          spaces.Discrete(int(self.consumers[2].minChargeForRoute*100)), # min charge needed for route, kWh * 100, to be an int
+          spaces.Discrete(self.consumers[2].timeToHub) #when it will next be at the hub in seconds
         )),
         spaces.Tuple(( #Bus 3
           spaces.Discrete(int(self.consumers[3].currCharge/self.consumers[1].maxCharge)), #bus charge
-          spaces.Discrete(self.consumers[3].minChargeForRoute), # min charge needed for route
-          spaces.Discrete(self.consumers[3].timeToHub)
+          spaces.Discrete(int(self.consumers[3].minChargeForRoute*100)), # min charge needed for route, kWh * 100, to be an int
+          spaces.Discrete(self.consumers[3].timeToHub) #when it will next be at the hub in seconds
         ))
       )),
       spaces.Tuple(( #All Trax Trains
         spaces.Tuple(( #Trax train 1
-          spaces.Discrete(int(self.consumers[4].energyUseForStep()*10)), # Energy use
-          spaces.Discrete(self.consumers[4].timeToHub)
+          spaces.Discrete(int(self.consumers[4].energyUseForStep()*100)), # Energy use, kWh * 100, to be an int
+          spaces.Discrete(self.consumers[4].timeToHub) #when it will next be at the hub in seconds
         )),
-        spaces.Tuple(( #Trax train 1
-          spaces.Discrete(int(self.consumers[5].energyUseForStep()*10)), # Energy use
-          spaces.Discrete(self.consumers[5].timeToHub)
+        spaces.Tuple(( #Trax train 2
+          spaces.Discrete(int(self.consumers[5].energyUseForStep()*100)), # Energy use, kWh * 100, to be an int
+          spaces.Discrete(self.consumers[5].timeToHub) #when it will next be at the hub in seconds
         ))
       )),
       spaces.Tuple(( #All Snowmelts Tuple 
         spaces.Tuple(( #Specific Snowmelt Tuple
           spaces.Discrete(self.consumers[6].running if 1 else 0), #On or Off - a Bool, just 1 or 0
-          spaces.Discrete(int(self.consumers[6].energyUseForStep()*10)) #Energy use, multiplied by 10 so it can be an int
+          spaces.Discrete(int(self.consumers[6].energyUseForStep()*100)) #Energy use, kWh * 100, to be an int
         ))
       )),
       spaces.Discrete(10), #fixed power consumption
       spaces.Discrete(int(self.pricingSchema.peakSummerChargeKWH*1000000)), #current price per kwh
-      spaces.Discrete(self.pricingSchema.peakEnergyThreashold), # peak power
-      spaces.Discrete(int(self.energyUseForMonth * 100)) #power usage for the month
+      spaces.Discrete(self.pricingSchema.peakEnergyThreashold*100), # peak power, kWh * 100, to match the magnitude of all the other energy uses
+      spaces.Discrete(int(self.energyUseForMonth * 100)) #power usage for the month, kWh * 100, to be an int
     ))
 
   def implementAction(self, action):
-    print("--TEST ACTION--")
-    print(action)
     #First - bool. Tell incoming bus to charge, or if a bus is charging tell it to leave
     if action[0][0] == 1:
       if self.consumers[0].occupied == True:
@@ -154,9 +156,8 @@ class HubEnv(gym.Env):
     #Second - int kWh * 100. Change power going to bus charger
     self.consumers[0].changePowerFlow(action[0][1]/100) 
     #Third - bool. Turn snowmelt on or off
-    if action[1][1] == 1:
+    if action[1][0] == 1:
       self.consumers[6].switchRunning()
-      print("snowmelt switch")
     #Fourth - int. kWh * 100. Charge power going to snowmelt
     self.consumers[6].changePowerFlow(action[1][1]/100)
 
