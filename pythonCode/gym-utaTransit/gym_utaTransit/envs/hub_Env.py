@@ -43,7 +43,8 @@ class HubEnv(gym.Env):
     self.pricingSchema = PricingSchema(54, 14.62, 10.91, .038127, .035143, 2300)
     self.chargeForMonth = self.pricingSchema.baseCharge
 
-    self.observation_space = spaces.Box(low=0, high=255, shape=(0,0,3))
+    self.observation_space = self.createObservationSpace()
+
     self.action_space = spaces.Tuple((
       spaces.Discrete(1),
       spaces.Discrete(1)
@@ -72,7 +73,7 @@ class HubEnv(gym.Env):
 
     reward = self.calculateReward()
     #return : observation, reward, done (this will always be false for us), info (not really sure what this needs to be, so empty obj)
-    return self.consumers, reward, False, {}
+    return self.createObservationSpace(), reward, False, {}
 
   def reset(self):
     self.consumers = []
@@ -84,6 +85,55 @@ class HubEnv(gym.Env):
     return 1
 
   #------------------------
+
+  def createObservationSpace(self):
+    test = int(self.consumers[0].energyUseForStep()*10)
+    print(test)
+    return spaces.Tuple((
+      spaces.Tuple(( #All Bus Chargers
+        spaces.Tuple(( #Specific Bus Charger Tuple
+          spaces.Discrete(self.consumers[0].occupied if 1 else 0), #Occupied - a Bool, just 1 or 0
+          spaces.Discrete(test)
+        ))
+      )),
+      spaces.Tuple(( #All Buses
+        spaces.Tuple(( #Bus 1
+          spaces.Discrete(int(self.consumers[1].currCharge/self.consumers[1].maxCharge)), #bus charge
+          spaces.Discrete(self.consumers[1].minChargeForRoute), # min charge needed for route
+          spaces.Discrete(self.consumers[1].timeToHub)
+        )),
+        spaces.Tuple(( #Bus 2
+          spaces.Discrete(int(self.consumers[2].currCharge/self.consumers[1].maxCharge)), #bus charge
+          spaces.Discrete(self.consumers[2].minChargeForRoute), # min charge needed for route
+          spaces.Discrete(self.consumers[2].timeToHub)
+        )),
+        spaces.Tuple(( #Bus 3
+          spaces.Discrete(int(self.consumers[3].currCharge/self.consumers[1].maxCharge)), #bus charge
+          spaces.Discrete(self.consumers[3].minChargeForRoute), # min charge needed for route
+          spaces.Discrete(self.consumers[3].timeToHub)
+        ))
+      )),
+      spaces.Tuple(( #All Trax Trains
+        spaces.Tuple(( #Trax train 1
+          spaces.Discrete(int(self.consumers[4].energyUseForStep()*10)), # Energy use
+          spaces.Discrete(self.consumers[4].timeToHub)
+        )),
+        spaces.Tuple(( #Trax train 1
+          spaces.Discrete(int(self.consumers[5].energyUseForStep()*10)), # Energy use
+          spaces.Discrete(self.consumers[5].timeToHub)
+        ))
+      )),
+      spaces.Tuple(( #All Snowmelts Tuple 
+        spaces.Tuple(( #Specific Snowmelt Tuple
+          spaces.Discrete(self.consumers[6].running if 1 else 0), #On or Off - a Bool, just 1 or 0
+          spaces.Discrete(int(self.consumers[6].energyUseForStep()*10)) #Energy use, multiplied by 10 so it can be an int
+        ))
+      )),
+      spaces.Discrete(10), #fixed power consumption
+      spaces.Discrete(int(self.pricingSchema.peakSummerChargeKWH*1000000)), #current price per kwh
+      spaces.Discrete(self.pricingSchema.peakEnergyThreashold), # peak power
+      spaces.Discrete(int(self.energyUseForMonth * 100)) #power usage for the month
+    ))
 
   def consolePrintState(self):
     print("timestamp: " + self.simulationDateTime.strftime("%d/%m/%Y, %H:%M:%S"))

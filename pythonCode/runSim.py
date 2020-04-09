@@ -20,6 +20,7 @@ def main():
       
       action = env.action_space.sample() # your agent here (this takes random actions)
       observation, reward, done, info = env.step(action)
+      print(observation)
 
       renderer.updateState(env.packageInfoForRenderer())
 

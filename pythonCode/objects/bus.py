@@ -19,6 +19,7 @@ class Bus(Vehicle):
             et #endTime
         )
         self.maxCharge = 700
+        self.minChargeForRoute = .04 * routeTime
         
         #Things that will change, but only by internal processes
         self.currCharge = 700 #in kWh
