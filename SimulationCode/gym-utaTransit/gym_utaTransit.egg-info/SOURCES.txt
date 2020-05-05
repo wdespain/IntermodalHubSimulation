@@ -1,0 +1,7 @@
+README.md
+setup.py
+gym_utaTransit.egg-info/PKG-INFO
+gym_utaTransit.egg-info/SOURCES.txt
+gym_utaTransit.egg-info/dependency_links.txt
+gym_utaTransit.egg-info/requires.txt
+gym_utaTransit.egg-info/top_level.txt
